@@ -102,7 +102,7 @@ public class ResumeView {
         System.out.println("자기소개서를 입력하세요. 여러 줄을 입력하려면 빈 줄을 입력하세요.");
         StringBuilder sb = new StringBuilder();
         String input;
-        while ((input = s.nextLine()).trim().length() > 0) {
+        while (!(input = s.nextLine()).trim().isEmpty()) {
             sb.append(input).append("\n");
         }
         return sb.toString().trim();
