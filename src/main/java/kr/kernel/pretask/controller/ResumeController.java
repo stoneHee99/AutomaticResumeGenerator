@@ -3,6 +3,7 @@ package kr.kernel.pretask.controller;
 import kr.kernel.pretask.model.Career;
 import kr.kernel.pretask.model.Education;
 import kr.kernel.pretask.model.PersonInfo;
+import kr.kernel.pretask.utility.LogUtil;
 import kr.kernel.pretask.view.ResumeView;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFClientAnchor;
@@ -86,7 +87,7 @@ public class ResumeController {
             int columnWidth = (int) Math.floor(((float) imageWidth / (float) 8) * 256);
             resumeSheet.setColumnWidth(0, columnWidth);
         } catch (IOException e) {
-            e.printStackTrace();
+            LogUtil.printError("이미지 파일 처리 중 오류가 발생했습니다", e);
         }
     }
 
@@ -157,7 +158,7 @@ public class ResumeController {
         try (FileOutputStream fileOut = new FileOutputStream("이력서.xls")) {
             workbook.write(fileOut);
         } catch (IOException e) {
-            e.printStackTrace();
+            LogUtil.printError("파일 저장 중 오류가 발생했습니다", e);
         }
     }
 
