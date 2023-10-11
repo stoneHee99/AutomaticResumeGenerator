@@ -22,11 +22,14 @@ public class ResumeController {
     private Workbook workbook;
     private Sheet resumeSheet;
     private Sheet selfIntroductionSheet;
+    private int rowIndex = 0;
     private static final double MILLIMETERS_TO_PIXEL = 2.83465;
 
     public ResumeController() {
         view = new ResumeView();
         workbook = new HSSFWorkbook();
+        rowIndex = 0;
+
         resumeSheet = workbook.createSheet("이력서");
         selfIntroductionSheet = workbook.createSheet("자기소개서");
     }
@@ -37,41 +40,23 @@ public class ResumeController {
         List<Career> careerList = view.inputCareerList();
         String selfIntroduction = view.inputSelfIntroduction();
 
-        createResumeSheet(personInfo, educationList, careerList);
-        createSelfIntroductionSheet(selfIntroduction);
+        writePersonInfo(personInfo);
+        writeEducation(educationList);
+        writeCareer(careerList);
+
+        writeSelfIntroductionSheet(selfIntroduction);
 
         saveWorkbookToFile();
 
         System.out.println("이력서 생성이 완료되었습니다.");
     }
 
-    private void createResumeSheet(PersonInfo personInfo, List<Education> educationList, List<Career> careerList) {
-        String[] personInfoHeaderMenu = {"사진", "이름", "이메일", "주소", "전화번호", "생년월일"};
-        createHeader(1, personInfoHeaderMenu);
-
-        Row personInfoDataRow = resumeSheet.createRow(1);
-        insertPhotoToResume(personInfo, personInfoDataRow);
-        createPersonInfoData(personInfoDataRow, personInfo);
-
-        int educationStartRow = 3;
-        String[] educationHeaderMenu = {"졸업년도", "학교명", "전공", "졸업여부"};
-        createHeader(3, educationHeaderMenu);
-
-        educationStartRow = createEducationData(educationList, educationStartRow);
-
-        int careerStartRow = educationStartRow + 1;
-        //createCareerHeader(careerStartRow);
-        String[] createHeaderMenu = {"근무기간", "근무처", "담당업무", "근속년수"};
-        createHeader(careerStartRow, createHeaderMenu);
-
-        createCareerData(careerList, careerStartRow);
-    }
-
-    private void createHeader(int rowNum, String[] headerArr) {
-        Row row = resumeSheet.createRow(rowNum - 1);
+    private void createHeader(String[] headerArr) {
+        Row row = resumeSheet.createRow(rowIndex);
         for (int i = 0; i < headerArr.length; i++) {
             row.createCell(i).setCellValue(headerArr[i]);
         }
+        rowIndex++;
     }
 
     private void insertPhotoToResume(PersonInfo personInfo, Row row) {
@@ -105,28 +90,49 @@ public class ResumeController {
         }
     }
 
+    private void writePersonInfo(PersonInfo personInfo) {
+        String[] headerMenu = {"사진", "이름", "이메일", "주소", "전화번호", "생년월일"};
+        createHeader(headerMenu);
+
+        Row personInfoDataRow = resumeSheet.createRow(rowIndex);
+        insertPhotoToResume(personInfo, personInfoDataRow);
+        createPersonInfoData(personInfoDataRow, personInfo);
+    }
+
+    private void writeEducation(List<Education> educationList) {
+        String[] headerMenu = {"졸업년도", "학교명", "전공", "졸업여부"};
+        createHeader(headerMenu);
+        createEducationData(educationList);
+    }
+
+    private void writeCareer(List<Career> careerList) {
+        String[] headerMenu = {"근무기간", "근무처", "담당업무", "근속년수"};
+        createHeader(headerMenu);
+        createCareerData(careerList);
+    }
+
     private void createPersonInfoData(Row r, PersonInfo personInfo) {
         r.createCell(1).setCellValue(personInfo.getName());
         r.createCell(2).setCellValue(personInfo.getEmail());
         r.createCell(3).setCellValue(personInfo.getAddress());
         r.createCell(4).setCellValue(personInfo.getPhoneNumber());
         r.createCell(5).setCellValue(personInfo.getBirthDate());
+        rowIndex++;
     }
 
-    private int createEducationData(List<Education> educationList, int rowNum) {
+    private void createEducationData(List<Education> educationList) {
         for (Education education : educationList) {
-            Row educationDataRow = resumeSheet.createRow(rowNum++);
+            Row educationDataRow = resumeSheet.createRow(rowIndex++);
             educationDataRow.createCell(0).setCellValue(education.getGraduationYear());
             educationDataRow.createCell(1).setCellValue(education.getSchoolName());
             educationDataRow.createCell(2).setCellValue(education.getMajor());
             educationDataRow.createCell(3).setCellValue(education.getGraduationStatus());
         }
-        return rowNum;
     }
 
-    private void createCareerData(List<Career> careerList, int rowNum) {
+    private void createCareerData(List<Career> careerList) {
         for (Career career : careerList) {
-            Row careerDataRow = resumeSheet.createRow(rowNum++);
+            Row careerDataRow = resumeSheet.createRow(rowIndex++);
             careerDataRow.createCell(0).setCellValue(career.getWorkPeriod());
             careerDataRow.createCell(1).setCellValue(career.getCompanyName());
             careerDataRow.createCell(2).setCellValue(career.getJobTitle());
@@ -134,7 +140,7 @@ public class ResumeController {
         }
     }
 
-    private void createSelfIntroductionSheet(String selfIntroduction) {
+    private void writeSelfIntroductionSheet(String selfIntroduction) {
         Row dataRow = selfIntroductionSheet.createRow(0);
         Cell selfIntroductionCell = dataRow.createCell(0);
         selfIntroductionCell.setCellStyle(getWrapCellStyle());
